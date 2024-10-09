@@ -1,0 +1,74 @@
+"""Bazel Module for the ameijboom portfolio platform"""
+module(name = "portfolio")
+
+rust_version = "1.78.0"
+
+bazel_dep(name = "rules_oci", version = "1.7.5")
+bazel_dep(name = "rules_pkg", version = "0.10.1")
+bazel_dep(name = "rules_rust", version = "0.45.1")
+bazel_dep(name = "rules_foreign_cc", version = "0.10.1")
+bazel_dep(name = "toolchains_llvm", version = "1.0.0")
+
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(
+    name = "llvm_toolchain",
+    llvm_version = "16.0.0",
+)
+
+llvm.sysroot(
+    name = "llvm_toolchain",
+    targets = ["linux-aarch64"],
+    label = "@org_chromium_sysroot_linux_arm64//:sysroot",
+)
+
+use_repo(llvm, "llvm_toolchain")
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    versions = [rust_version],
+    extra_target_triples = ["aarch64-unknown-linux-gnu"],
+)
+
+use_repo(rust, "rust_toolchains")
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "distroless_cc",
+    digest = "sha256:a9056d2232d16e3772bec3ef36b93a5ea9ef6ad4b4ed407631e534b85832cf40",
+    image = "gcr.io/distroless/cc-debian12",
+    platforms = ["linux/amd64", "linux/arm64/v8"],
+)
+
+use_repo(oci, "distroless_cc")
+
+crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+crate.from_cargo(
+    name = "crates",
+    cargo_lockfile = "//:Cargo.lock",
+    manifests = [
+        "//music-api:Cargo.toml",
+        "//:Cargo.toml",
+    ],
+)
+
+use_repo(crate, "crates")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+http_archive(
+    name = "org_chromium_sysroot_linux_arm64",
+    build_file_content = """
+    filegroup(
+        name = "sysroot",
+        srcs = glob(["*/**"]),
+        visibility = ["//visibility:public"],
+    )
+    """,
+    sha256 = "cf2fefded0449f06d3cf634bfa94ffed60dbe47f2a14d2900b00eb9bcfb104b8",
+    urls = ["https://commondatastorage.googleapis.com/chrome-linux-sysroot/toolchain/80fc74e431f37f590d0c85f16a9d8709088929e8/debian_bullseye_arm64_sysroot.tar.xz"],
+)
+
+register_toolchains(
+    "@rust_toolchains//:all",
+    "@llvm_toolchain//:all",
+)
