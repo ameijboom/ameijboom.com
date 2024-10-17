@@ -1,0 +1,15 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: apple-music-auth-key
+  namespace: portfolio
+spec:
+  encryptedData:
+    KEY: AgB2VbRo4rNY7EuibOc3yz3Dqi5qqdRBxM4212swrIKagTttmzgh8fBQuIHFujdB6b20KqyltWOmGxqbLi48mYEQVskYpSbb1V80umDtzyajOlTwR//8Aap1ongB+6o6sQbAyXagFIadlT+olvtv+xYMk9iKZHVsfUcF7YwyEo/lql+jD+EuRgu0JEXFtoWMDKOYUEsYFjajE3FmU8pF6k4Unk+aMfqWp5y8GbOAlxk2bK9W9PRMHSRU32O5wU1LJnfh5F3t0EImhiHsw+dCYQ63sAn1qTxwLGYL+42eNfAcOySMXpWJdeTc4HyLCNwNuwYHtBUhkk/irirKhn/Yy4RGe7yCPDhaJe6EihSJDDx40O9r5TLvoUT8StppZZZAGcb5+pe69X0PBASIJE5V+3FrYtv8lFTtaREFMDWiCJLXejHKXPUPmooJGvq6Mat2/SdgfqjrdyW8/tTh1sBep48ZE2E2nv7PuvGD6YsMEtYbOunr/ccz2DocsbrcTQdJNDo+4cWGlU5I4Z0fEZrm+go5Su6/QllSn5TR8uA8HAoLbUiNgsZQd4mhn9rfQBYcfnJ4esVMmtTXT/Dsw9XQ5iVyAxcXbgogaBS8sOnn4Bs6kNnpTA1MEhZPRuX/RegFh480AIuz7mXyKnoRtmlLAQjwjUvZJqD/BEc8TH7ppSgyg3IUukgSba6i6smAnCcCmF/WGyFS8wboEUSTHk5gMKx7qwI/PV3zbfVMJaUuaaCKtJcFN73qhwf0QicjHRaQP3/pVtq3WJoQPgdPVT09Qt7+mi5q7+xkyzSCfricOXE4Sf32vaO6TI60X5zUvhn4a4fgj7f3Q/1mlkanIURKyPtaPnDzcT8H3mmC1XIcxACOTG/5KgzIAjiRspVbQq9Jd1A0qiWzOJYvJZyGmw99V8aTi4D8D9sWzX+jy/LBFI4HTBEmIbEviGU88LqyWFllgzUBFC/VU1ODRTje8rDWbMNI4kgYFhcD5Iou07gMLcXsU+NdRZfaxbMH3G27zVc71b6+9zsLxnyhMkTMd0ii5yZiqw==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: apple-music-auth-key
+      namespace: portfolio

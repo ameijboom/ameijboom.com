@@ -1,0 +1,3 @@
+[workspace]
+members = ["music-api"]
+resolver = "2"
