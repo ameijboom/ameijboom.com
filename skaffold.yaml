@@ -2,11 +2,52 @@ apiVersion: skaffold/v4beta11
 kind: Config
 metadata:
   name: ameijboom.com
-deploy:
+
+build:
+  artifacts:
+    - image: frontend
+      context: frontend
+      docker:
+        buildArgs: {}
+    - image: music-api
+      bazel:
+        target: music-api:image.tar
+  local:
+    concurrency: 1
+    useBuildkit: true
+
+manifests:
   helm:
     releases:
-      - name: helm
+      - name: portfolio
         chartPath: helm
-        valuesFiles:
+        namespace: portfolio
+        createNamespace: true
+        skipBuildDependencies: true
+        setValueTemplates:
+          imageFrontend: "{{ .IMAGE_FULLY_QUALIFIED_frontend }}"
+          imageMusicAPI: "{{ .IMAGE_FULLY_QUALIFIED_music_api }}"
+
+deploy:
+  helm: {}
+  statusCheckDeadlineSeconds: 300
+
+profiles:
+  - name: local
+    deploy:
+      kubeContext: k3d-portfolio-local
+    patches:
+      - op: add
+        path: /manifests/helm/releases/0/valuesFiles
+        value:
           - helm/values.yaml
-        version: 0.1.0
+          - helm/values-local.yaml
+  - name: prod
+    deploy:
+      kubeContext: byrne
+    patches:
+      - op: add
+        path: /manifests/helm/releases/0/valuesFiles
+        value:
+          - helm/values.yaml
+          - helm/values-prod.yaml

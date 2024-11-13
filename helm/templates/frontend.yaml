@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      imagePullSecrets: 
+      - name: github-registry
+      replicas: 1
+      containers:
+      - name: frontend
+        image: {{ .Values.imageFrontend }}
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: HOSTNAME
+          value: 0.0.0.0
+        ports:
+          - name: frontend
+            containerPort: 3000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: frontend
+          initialDelaySeconds: 5
+          failureThreshold: 3
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: frontend
+          initialDelaySeconds: 5
+          failureThreshold: 3
+          timeoutSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+    - port: 3000
+      nodePort: 30300
+      targetPort: 3000
+
+{{ if eq .Values.env "prod" }}
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-gateway
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      namespace: envoy-system-gateway
+  to:
+    - group: ""
+      kind: Secret
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: frontend
+spec:
+  secretName: tls-cert-frontend
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  dnsNames:
+    - ameijboom.com
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: frontend
+spec:
+  parentRefs:
+    - name: gateway
+      namespace: envoy-system-gateway
+  hostnames:
+    - ameijboom.com
+  rules:
+    - backendRefs:
+      - name: frontend
+        port: 3000
+{{ end }}
+{{ if eq .Values.env "local" }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: frontend.ameijboom.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service: 
+            name: frontend
+            port: 
+              number: 3000
+{{ end }}
