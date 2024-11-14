@@ -3,7 +3,7 @@ use clap::Parser;
 use models::AppleAuth;
 use state::{AppleMusicUserToken, State};
 use tokio::net::TcpListener;
-use tower_http::trace::TraceLayer;
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
 
 pub mod models;
 pub mod routes;
@@ -59,6 +59,7 @@ async fn main() -> Result<(), MusicApiError> {
         .route("/_health", get(health))
         .route("/api/v1/recent", get(routes::recent::v1::route))
         .with_state(state)
+        .layer(CorsLayer::permissive())
         .layer(TraceLayer::new_for_http());
 
     tracing::info!("started listening on 0.0.0.0:8080");
