@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: music-api
+spec:
+  selector:
+    matchLabels:
+      app: music-api
+  template:
+    metadata:
+      labels:
+        app: music-api
+    spec:
+      imagePullSecrets: 
+      - name: github-registry
+      replicas: 1
+      containers:
+      - name: music-api
+        image: {{ .Values.imageMusicAPI }}
+        imagePullPolicy: IfNotPresent
+        envFrom:
+          - secretRef:
+              name: music-api-env
+        env:
+        - name: RUST_LOG
+          value: {{ .Values.musicAPI.logLevel }}
+        - name: APPLE_TEAM_ID
+          value: "F8VDNJKLC2"
+        - name: APPLE_KEY_ID
+          value: "3D452UQ77X"
+        ports:
+          - name: music-api
+            containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /_health
+            port: music-api
+          initialDelaySeconds: 5
+          failureThreshold: 3
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /_health
+            port: music-api
+          initialDelaySeconds: 5
+          failureThreshold: 3
+          timeoutSeconds: 5
+
+{{ if eq .Values.env "local" }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: music-api
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: music-api.ameijboom.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service: 
+            name: music-api
+            port: 
+              number: 8080
+{{ end }}

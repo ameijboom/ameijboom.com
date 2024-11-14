@@ -12,6 +12,11 @@ build:
     - image: music-api
       bazel:
         target: music-api:image.tar
+        platforms:
+          - platform: linux/amd64
+            target: //:linux-amd64
+          - platform: linux/arm64
+            target: //:linux-arm64
   local:
     concurrency: 1
     useBuildkit: true

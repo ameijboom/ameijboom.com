@@ -24,7 +24,7 @@ pub enum MusicApiError {
 
 #[derive(Parser)]
 struct Args {
-    #[clap(long, env = "APPLE_AUTH_KEY")]
+    #[clap(long, env = "APPLE_MUSIC_KEY")]
     pub apple_auth_key: String,
     #[clap(long, env = "APPLE_KEY_ID")]
     pub apple_key_id: String,
