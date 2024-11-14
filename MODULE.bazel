@@ -7,7 +7,8 @@ bazel_dep(name = "rules_oci", version = "1.7.5")
 bazel_dep(name = "rules_pkg", version = "0.10.1")
 bazel_dep(name = "rules_rust", version = "0.45.1")
 bazel_dep(name = "rules_foreign_cc", version = "0.10.1")
-bazel_dep(name = "toolchains_llvm", version = "1.0.0")
+bazel_dep(name = "toolchains_llvm", version = "1.2.0")
+bazel_dep(name = "chrome-linux-sysroot", version = "0.0.1")
 
 llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
 llvm.toolchain(
@@ -18,20 +19,16 @@ llvm.toolchain(
 llvm.sysroot(
     name = "llvm_toolchain",
     targets = ["linux-aarch64"],
-    label = "@org_chromium_sysroot_linux_arm64//:sysroot",
+    label = "@@chrome-linux-sysroot~~_repo_rules~debian_bullseye_arm64//:sysroot",
+)
+
+llvm.sysroot(
+    name = "llvm_toolchain",
+    targets = ["linux-x86_64"],
+    label = "@@chrome-linux-sysroot~~_repo_rules~debian_bullseye_amd64//:sysroot",
 )
 
 use_repo(llvm, "llvm_toolchain")
-
-rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
-rust.toolchain(
-    edition = "2021",
-    versions = [rust_version],
-    extra_target_triples = ["aarch64-unknown-linux-gnu"],
-)
-
-use_repo(rust, "rust_toolchains")
-
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 oci.pull(
     name = "distroless_cc",
@@ -40,7 +37,19 @@ oci.pull(
     platforms = ["linux/amd64", "linux/arm64/v8"],
 )
 
-use_repo(oci, "distroless_cc")
+use_repo(oci, "distroless_cc", "distroless_cc_linux_amd64", "distroless_cc_linux_arm64_v8")
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    versions = [rust_version],
+    extra_target_triples = [
+        "aarch64-unknown-linux-gnu",
+        "x86_64-unknown-linux-gnu",
+    ],
+)
+
+use_repo(rust, "rust_toolchains")
 
 crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
 crate.from_cargo(
@@ -53,20 +62,6 @@ crate.from_cargo(
 )
 
 use_repo(crate, "crates")
-
-http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-http_archive(
-    name = "org_chromium_sysroot_linux_arm64",
-    build_file_content = """
-    filegroup(
-        name = "sysroot",
-        srcs = glob(["*/**"]),
-        visibility = ["//visibility:public"],
-    )
-    """,
-    sha256 = "cf2fefded0449f06d3cf634bfa94ffed60dbe47f2a14d2900b00eb9bcfb104b8",
-    urls = ["https://commondatastorage.googleapis.com/chrome-linux-sysroot/toolchain/80fc74e431f37f590d0c85f16a9d8709088929e8/debian_bullseye_arm64_sysroot.tar.xz"],
-)
 
 register_toolchains(
     "@rust_toolchains//:all",
