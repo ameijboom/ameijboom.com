@@ -1,0 +1,9 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: minstrel
+build:
+  artifacts:
+    - image: frontend
+      docker:
+        dockerfile: frontend/Dockerfile
