@@ -5,5 +5,9 @@ metadata:
 build:
   artifacts:
     - image: frontend
+      context: frontend
       docker:
-        dockerfile: frontend/Dockerfile
+        buildArgs: {}
+
+  local:
+    useBuildkit: true
