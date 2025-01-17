@@ -11,6 +11,7 @@ WORKDIR /build
 COPY package.json pnpm-lock.yaml /build/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 COPY . /build/
+RUN pnpm exec next telemetry disable
 RUN pnpm run build
 
 FROM denoland/deno:2.1.5
