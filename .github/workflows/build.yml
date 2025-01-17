@@ -36,7 +36,7 @@ jobs:
       - name: Build and push with Skaffold
         run: |
           skaffold build \
-            --default-repo=ghcr.io/${{ github.repository_owner }} \
+            --default-repo=ghcr.io/${{ github.repository_owner }}/ameijboom.com \
             --file-output=skaffold.json \
             --push
         env:

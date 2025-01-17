@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-import daisyui from "daisyui";
+import flyonui from "flyonui";
 
 const config: Config = {
   content: [
@@ -7,7 +7,15 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  theme: {},
-  plugins: [daisyui],
+  plugins: [flyonui],
+  flyonui: {
+    themes: false,
+    darkTheme: "dark"
+  },
+  theme: {
+    fontFamily: {
+      sans: ['var(--font-monaspace-neon)', 'Inter', 'sans-serif']
+    }
+  }
 };
 export default config;
